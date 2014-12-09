@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 use lib 'lib';
-use FranticCom::SetCloudEnv ( $ENV{PLACK_ENV} || 'development' );
+use Env::Heroku::Pg;
 use WebApp;
 use DBIx::Class::Migration::Script;
 
