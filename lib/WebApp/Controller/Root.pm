@@ -1,70 +1,48 @@
 package WebApp::Controller::Root;
+use utf8;
 use Moose;
 use namespace::autoclean;
+use Data::Dumper;
+use Try::Tiny;
 
-BEGIN { extends 'Catalyst::Controller' }
+BEGIN { extends 'Catalyst::Controller::REST' }
 
-#
-# Sets the actions in this controller to be registered with no prefix
-# so they function identically to actions created in MyApp.pm
-#
-__PACKAGE__->config(namespace => '');
+__PACKAGE__->config(
+    default => 'application/json',
+    namespace => '',
+);
 
-=encoding utf-8
-
-=head1 NAME
-
-WebApp::Controller::Root - Root Controller for WebApp
-
-=head1 DESCRIPTION
-
-[enter your description here]
-
-=head1 METHODS
-
-=head2 index
-
-The root page (/)
-
-=cut
-
-sub index :Path :Args(0) {
+sub demo : Local ActionClass('REST') {
     my ( $self, $c ) = @_;
+    if ( $c->req->header('Origin') ) {
+        $c->res->header('Access-Control-Allow-Origin' => '*')
+    }
+};
 
-    # Hello World
-    $c->response->body( $c->welcome_message );
+sub demo_OPTIONS {
+    my ( $self, $c, $id ) = @_;
+    $c->res->header('Access-Control-Allow-Methods', 'GET');
+    $self->status_no_content( $c );
+};
+
+sub demo_GET {
+    my ( $self, $c, $id ) = @_;
+    try {
+        my $row = $c->model('DB::Demo')->find($id);
+        my $entity = {
+            id => $row->id,
+            message => $row->message,
+        };
+        $self->status_ok( $c, entity => $entity );
+    } catch {
+        $self->status_not_found( $c, message => 'not found' );
+    };
 }
 
-=head2 default
-
-Standard 404 error page
-
-=cut
-
-sub default :Path {
+sub default : Path {
     my ( $self, $c ) = @_;
-    $c->response->body( 'Page not found' );
-    $c->response->status(404);
+    $self->status_not_found( $c, message => 'no such api method' );
 }
-
-=head2 end
-
-Attempt to render a view, if needed.
-
-=cut
-
-sub end : ActionClass('RenderView') {}
-
-=head1 AUTHOR
-
-Panu Ervamaa
-
-=head1 LICENSE
-
-This library is free software. You can redistribute it and/or modify
-it under the same terms as Perl itself.
-
-=cut
 
 __PACKAGE__->meta->make_immutable;
 

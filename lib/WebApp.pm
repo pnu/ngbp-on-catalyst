@@ -17,9 +17,7 @@ use Catalyst::Runtime 5.80;
 #                 directory
 
 use Catalyst qw/
-    -Debug
     ConfigLoader
-    Static::Simple
 /;
 
 extends 'Catalyst';
@@ -44,34 +42,5 @@ __PACKAGE__->config(
 
 # Start the application
 __PACKAGE__->setup();
-
-=encoding utf8
-
-=head1 NAME
-
-WebApp - Catalyst based application
-
-=head1 SYNOPSIS
-
-    script/webapp_server.pl
-
-=head1 DESCRIPTION
-
-[enter your description here]
-
-=head1 SEE ALSO
-
-L<WebApp::Controller::Root>, L<Catalyst>
-
-=head1 AUTHOR
-
-Panu Ervamaa
-
-=head1 LICENSE
-
-This library is free software. You can redistribute it and/or modify
-it under the same terms as Perl itself.
-
-=cut
 
 1;
