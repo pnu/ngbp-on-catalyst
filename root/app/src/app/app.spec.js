@@ -1,17 +1,7 @@
-describe( 'AppCtrl', function() {
-  describe( 'isCurrentUrl', function() {
-    var AppCtrl, $location, $scope;
+describe( 'app main module', function() {
+  beforeEach( module( 'app' ) );
 
-    beforeEach( module( 'ngBoilerplate' ) );
-
-    beforeEach( inject( function( $controller, _$location_, $rootScope ) {
-      $location = _$location_;
-      $scope = $rootScope.$new();
-      AppCtrl = $controller( 'AppCtrl', { $location: $location, $scope: $scope });
-    }));
-
-    it( 'should pass a dummy test', inject( function() {
-      expect( AppCtrl ).toBeTruthy();
-    }));
-  });
+  it( 'should have a dummy test', inject( function() {
+    expect( true ).toBeTruthy();
+  }));
 });

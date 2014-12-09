@@ -1,25 +1,18 @@
-angular.module( 'ngBoilerplate', [
-  'templates-app',
-  'templates-common',
-  'ngBoilerplate.home',
-  'ngBoilerplate.about',
-  'ui.router'
-])
+var app = angular.module('app', [
+    'templates-common',
+    'templates-app',
+    'ngResource',
+    'demoDirective'
+]);
 
-.config( function myAppConfig ( $stateProvider, $urlRouterProvider ) {
-  $urlRouterProvider.otherwise( '/home' );
-})
+app.factory("api", [ "$resource", function($resource) {
+    var apiUrl = '/api';
+    return {
+        demo: $resource(apiUrl + "/demo/:id")
+    };
+} ]);
 
-.run( function run () {
-})
-
-.controller( 'AppCtrl', function AppCtrl ( $scope, $location ) {
-  $scope.$on('$stateChangeSuccess', function(event, toState, toParams, fromState, fromParams){
-    if ( angular.isDefined( toState.data.pageTitle ) ) {
-      $scope.pageTitle = toState.data.pageTitle + ' | ngBoilerplate' ;
-    }
-  });
-})
-
-;
+app.controller('MainCtrl', [ function() {
+    this.sayWhat = 'Hello from MainCtrl.';
+} ]);
 

@@ -1,17 +1,8 @@
 {
-  "author": "Josh David Miller",
-  "name": "ngbp",
-  "version": "0.3.2",
-  "homepage": "https://github.com/ngbp/ngbp",
-  "licenses": {
-    "type": "MIT",
-    "url": "https://raw.github.com/ngbp/ngbp/master/LICENSE"
-  },
-  "bugs": "https://github.com/ngbp/ngbp/issues",
-  "repository": {
-    "type": "git",
-    "url": "git@github.com:ngbp/ngbp.git"
-  },
+  "author": "Frantic",
+  "homepage": "https://www.frantic.com/",
+  "name": "app",
+  "version": "0.0.1",
   "dependencies": {},
   "devDependencies": {
     "grunt": "~0.4.1",
