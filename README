@@ -1,0 +1,202 @@
+NGBP-ON-CATALYST
+
+Boilerplate for deploying ngbp based AngularJS app locally and to Heroku.
+
+You're assumed to have tools like git, heroku, brew, perl, cpanm, npm, grunt,
+bower, sass etc. in place. See PREREQUISITES below for more information.
+
+INITIAL SETUP / CLONE
+
+    git clone git@github.com:pnu/ngbp-on-catalyst.git myapp
+    cd myapp
+    rm -rf .git
+    git init
+    git add -A
+    git commit -m 'starting with ngbp-on-catalyst'
+
+    open https://github.com/new
+    git remote add origin git@github.com:<me>/<my-app>.git
+    git push -u origin master
+
+HEROKU SETUP
+
+The application can be deployed directly to Heroku with correct buildpack.
+The application root URL will serve files from root/app/bin directory,
+that contains index.html, the assets and the concatenated and minified css
+and javascript files.
+
+    heroku create --buildpack https://github.com/pnu/heroku-buildpack-perl
+    git push heroku master
+    open https://<my-app-1234>.herokuapp.com/
+
+LOCAL DEPLOYMENT
+
+You can run the application in localhost with the plackup command.
+The Catalyst applicaiton will serve all URLs with the index.html,
+so your HTML5 mode routers work as expected.
+
+    cpanm --installdeps .
+    plackup # the server
+    open http://localhost:5000/
+
+ANGULAR DEVELOPMENT
+
+The Grunt will build a non-minified version for local development to the
+root/app/build directory. The local server serves that with URLs /build/*.
+Leave the "grunt watch" open in another window for quick iteration. Note that
+/root/app/build is ignored by git.
+
+    cd root/app
+    npm install
+    bower install
+    grunt
+    grunt watch # run tests and rebuild /build/ on change
+
+    open http://localhost:5000/build/
+
+Adding new javascript modules / dependencies.
+
+    bower install foo-bar --save-dev
+    edit build.config.js
+
+    git add bower.json build.config.js
+    git commit -m 'add new dependencies'
+
+Angular code is in root/app/src. Split the code to modules and directives.
+Commit code changes separate from the built assets.
+
+    edit src/...
+
+    git add -A src
+    git commit -m 'preperly formatted commit message'
+
+BUILDING THE MINIFIED DEPLOYMENT VERSION
+
+The Grunt task "compile" will build the minified version to path root/app/bin.
+This is committed to the version control for Heroku deployment.
+
+    cd root/app
+    grunt compile
+
+    git add bin
+    git commit -m 'compiled assets'
+    # git push heroku master
+
+LOCAL DATABASE DEPLOYMENT
+
+The provided example app and REST backend api implements one simple
+method that queries the database. Create a database, install the
+schema and populate with some data to use it.
+
+    createdb myapp
+    PGDATABASE=myapp database/migrate.pl install
+    psql myapp
+    =# insert into demo values(1,'heivaan');
+    =# \q
+
+HEROKU DATABASE DEPLOYMENT
+
+    heroku addons:add heroku-postgresql
+    heroku run database/migrate.pl install
+    heroku pg:psql
+    => insert into demo values(1,'heivaan');
+    => \q
+
+BACKEND API DEVELOPMENT
+
+Start the server with option "-R lib" to have it reload on controller
+code changes. PGDATABASE=... specifies the locally used database.
+API controllers are in lib/WebApp/Controller/.
+
+    PGDATABASE=myapp plackup -R lib
+    open http://localhost:5000/
+
+DATABASE SCHEMA CHANGES
+
+Modify the schema defition in lib/WebApp/Schema/Result/. Update the schema
+version in lib/WebApp/Schema.pm. Use migration script to build the migration
+SQL files and to deploy the changes (locally and on heroku).
+
+    edit lib/WebApp/Schema/Result/...
+    edit lib/WebApp/Schema.pm
+
+    PGDATABASE=myapp database/migrate.pl status
+    # Schema is X
+    # Deployed database is Y
+    PGDATABASE=myapp database/migrate.pl prepare
+
+This creates database migration SQL (deploy, upgrade and downgrade) based on
+the schema definitions and database. The SQL is generato to share/. Verify
+it and deploy to local database.
+
+    PGDATABASE=myapp database/migrate.pl install
+
+This will rollback if unable to apply. After testing, commit the schema
+changes and generated files. If not, you can redo the prepare with
+"--force_overwrite" to regenerate migration SQL for the new version.
+
+    git add lib/WebApp/Schema/Result lib/WebApp/Schema.pm share
+    git commit -m 'schema version X: add column table.foo'
+
+DEPLOYING DATABASE SCHEMA CHANGES TO HEROKU
+
+To run the migration for remote Heroku database, you have to first push
+the code (with the new schema deployment SQL). When code is deployed to
+Heroku, it automatically uses the configured DATABASE_URL as the db.
+
+    git push heroku master
+    heroku run database/migrate.pl status
+    # Schema is X
+    # Deployed database is Y
+    heroku run database/migrate.pl upgrade
+
+
+PREREQUISITES
+
+These instructions are for a recent OS X environments. Install Xcode from
+App Store, and Heroku toolbelt from https://toolbelt.heroku.com/
+
+Basic CLI tools and libs
+
+    ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+    #.. follow the instructions, run "brew doctor" etc.
+
+    # for brews, make sure /usr/local/bin is in path before /usr/bin
+    echo 'export PATH=/usr/local/bin:$PATH' >>~/.bash_profile
+    exec $SHELL -l  # restart the shell
+
+    brew install libpng jpeg giflib libtiff
+    brew install plenv
+    brew install perl-build
+    echo 'if which plenv > /dev/null; then eval "$(plenv init -)"; fi' >>.bash_profile
+    exec $SHELL -l  # ..or close the terminal window and start a new
+
+    plenv install 5.20.0
+    plenv global 5.20.0
+    plenv install-cpanm
+    plenv rehash
+    exec $SHELL -l  # ..or close the terminal window and start a new
+
+    # lots of dependencies you'll need anyway, but not immediately
+    cpanm --quiet --notest Catalyst
+
+PostgreSQL
+
+    brew install postgresql # read the instructions
+    launchctl load ~/Library/LaunchAgents/homebrew.mxcl.postgresql.plist
+    initdb /usr/local/var/postgres -E utf8
+    # you should test it before continuing
+    createdb testing
+    psql testing
+    => ...
+    dropdb testing
+
+    # this should now install cleanly
+    cpanm --quiet DBD::Pg
+
+Grunt, bower and sass
+
+    brew install node
+    npm install -g grunt-cli bower
+    gem install sass
+
