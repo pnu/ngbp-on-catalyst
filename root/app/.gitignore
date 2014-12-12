@@ -6,3 +6,4 @@ vendor/
 /bin/assets/*.sass.css
 /bin/assets/*.less.css
 /bin/assets/*.map
+!.bowerrc
