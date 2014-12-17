@@ -35,7 +35,8 @@ sub demo_GET {
         };
         $self->status_ok( $c, entity => $entity );
     } catch {
-        $self->status_not_found( $c, message => 'not found' );
+        die $_ unless blessed $_ && $_->isa('WebApp::Error');
+        $self->status_not_found( $c, message => $_->message );
     };
 }
 
